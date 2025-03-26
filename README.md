@@ -5,10 +5,9 @@
     <img src="https://img.shields.io/badge/-Firebase-black?style=for-the-badge&logoColor=white&logo=firebase&color=DD2C00" alt="firebase" />
 </div>
 
-<h3 align="center">Prepwise: A job interview preparation platform powered by Vapi AI Voice agents</h3>
+<h2 align="center">Prepwise: A job interview preparation platform powered by Vapi AI Voice agents</h2>
 
-**Deployed to Vercel:**  
-[https://prep-wise-nine.vercel.app/](https://prep-wise-nine.vercel.app/)
+<h3 align="center">Deployed to Vercel: [https://prep-wise-nine.vercel.app/](https://prep-wise-nine.vercel.app/)</h3>
 
 ## 🚨 Tutorial
 
