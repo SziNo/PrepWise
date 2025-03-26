@@ -1,13 +1,13 @@
-"use server";
+'use server'
 
-import { generateObject } from "ai";
-import { google } from "@ai-sdk/google";
+import { generateObject } from 'ai'
+import { google } from '@ai-sdk/google'
 
-import { db } from "@/firebase/admin";
-import { feedbackSchema } from "@/constants";
+import { db } from '@/firebase/admin'
+import { feedbackSchema } from '@/constants'
 
 export async function createFeedback(params: CreateFeedbackParams) {
-  const { interviewId, userId, transcript, feedbackId } = params;
+  const { interviewId, userId, transcript, feedbackId } = params
 
   try {
     const formattedTranscript = transcript
@@ -15,10 +15,10 @@ export async function createFeedback(params: CreateFeedbackParams) {
         (sentence: { role: string; content: string }) =>
           `- ${sentence.role}: ${sentence.content}\n`
       )
-      .join("");
+      .join('')
 
     const { object } = await generateObject({
-      model: google("gemini-2.0-flash-001", {
+      model: google('gemini-2.0-flash-001', {
         structuredOutputs: false,
       }),
       schema: feedbackSchema,
@@ -35,8 +35,8 @@ export async function createFeedback(params: CreateFeedbackParams) {
         - **Confidence & Clarity**: Confidence in responses, engagement, and clarity.
         `,
       system:
-        "You are a professional interviewer analyzing a mock interview. Your task is to evaluate the candidate based on structured categories",
-    });
+        'You are a professional interviewer analyzing a mock interview. Your task is to evaluate the candidate based on structured categories',
+    })
 
     const feedback = {
       interviewId: interviewId,
@@ -47,79 +47,100 @@ export async function createFeedback(params: CreateFeedbackParams) {
       areasForImprovement: object.areasForImprovement,
       finalAssessment: object.finalAssessment,
       createdAt: new Date().toISOString(),
-    };
-
-    let feedbackRef;
-
-    if (feedbackId) {
-      feedbackRef = db.collection("feedback").doc(feedbackId);
-    } else {
-      feedbackRef = db.collection("feedback").doc();
     }
 
-    await feedbackRef.set(feedback);
+    let feedbackRef
 
-    return { success: true, feedbackId: feedbackRef.id };
+    if (feedbackId) {
+      feedbackRef = db.collection('feedback').doc(feedbackId)
+    } else {
+      feedbackRef = db.collection('feedback').doc()
+    }
+
+    await feedbackRef.set(feedback)
+
+    return { success: true, feedbackId: feedbackRef.id }
   } catch (error) {
-    console.error("Error saving feedback:", error);
-    return { success: false };
+    console.error('Error saving feedback:', error)
+    return { success: false }
   }
 }
 
 export async function getInterviewById(id: string): Promise<Interview | null> {
-  const interview = await db.collection("interviews").doc(id).get();
+  const interview = await db.collection('interviews').doc(id).get()
 
-  return interview.data() as Interview | null;
+  return interview.data() as Interview | null
 }
 
 export async function getFeedbackByInterviewId(
   params: GetFeedbackByInterviewIdParams
 ): Promise<Feedback | null> {
-  const { interviewId, userId } = params;
+  const { interviewId, userId } = params
 
   const querySnapshot = await db
-    .collection("feedback")
-    .where("interviewId", "==", interviewId)
-    .where("userId", "==", userId)
+    .collection('feedback')
+    .where('interviewId', '==', interviewId)
+    .where('userId', '==', userId)
     .limit(1)
-    .get();
+    .get()
 
-  if (querySnapshot.empty) return null;
+  if (querySnapshot.empty) return null
 
-  const feedbackDoc = querySnapshot.docs[0];
-  return { id: feedbackDoc.id, ...feedbackDoc.data() } as Feedback;
+  const feedbackDoc = querySnapshot.docs[0]
+  return { id: feedbackDoc.id, ...feedbackDoc.data() } as Feedback
 }
 
 export async function getLatestInterviews(
   params: GetLatestInterviewsParams
 ): Promise<Interview[] | null> {
-  const { userId, limit = 20 } = params;
+  const { userId, limit = 20 } = params
 
   const interviews = await db
-    .collection("interviews")
-    .orderBy("createdAt", "desc")
-    .where("finalized", "==", true)
-    .where("userId", "!=", userId)
+    .collection('interviews')
+    .orderBy('createdAt', 'desc')
+    .where('finalized', '==', true)
+    .where('userId', '!=', userId)
     .limit(limit)
-    .get();
+    .get()
 
   return interviews.docs.map((doc) => ({
     id: doc.id,
     ...doc.data(),
-  })) as Interview[];
+  })) as Interview[]
 }
 
 export async function getInterviewsByUserId(
   userId: string
 ): Promise<Interview[] | null> {
   const interviews = await db
-    .collection("interviews")
-    .where("userId", "==", userId)
-    .orderBy("createdAt", "desc")
-    .get();
+    .collection('interviews')
+    .where('userId', '==', userId)
+    .orderBy('createdAt', 'desc')
+    .get()
 
   return interviews.docs.map((doc) => ({
     id: doc.id,
     ...doc.data(),
-  })) as Interview[];
+  })) as Interview[]
+}
+
+export async function deleteInterviewById(interviewId: string): Promise<void> {
+  try {
+    await db.collection('interviews').doc(interviewId).delete()
+
+    // Find and delete related feedback
+    const feedbackSnapshot = await db
+      .collection('feedback')
+      .where('interviewId', '==', interviewId)
+      .get()
+
+    const batch = db.batch()
+    feedbackSnapshot.docs.forEach((doc) => {
+      batch.delete(doc.ref)
+    })
+
+    await batch.commit()
+  } catch (error) {
+    console.error('Error deleting interview:', error)
+  }
 }

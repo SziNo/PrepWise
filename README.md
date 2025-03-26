@@ -26,7 +26,7 @@ Follow these steps to make the most out of PrepWise:
 ## 3. Navigate the Home Page
 
 **Option 1**: Select an existing interview under **"Take an Interview"**.  
-**Option 2**: Create a new interview by clicking the **"Start an Interview"** button.
+**Option 2**: Create a new interview by clicking the **"Create your Interview"** button.
 
 ## 4. Start the Call
 

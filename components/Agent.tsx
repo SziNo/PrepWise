@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react'
 import { vapi } from '@/lib/vapi.sdk'
 import { interviewer } from '@/constants'
 import { createFeedback } from '@/lib/actions/general.action'
+import { toast } from 'sonner'
 
 enum CallStatus {
   INACTIVE = 'INACTIVE',
@@ -67,19 +68,33 @@ const Agent = ({
   }, [])
 
   const handleGenerateFeedback = async (messages: SavedMessage[]) => {
-    console.log('Generating feedback...')
+    try {
+      toast('Generating feedback...', {
+        description: 'Please wait while we analyze the interview responses.',
+      })
 
-    const { success, feedbackId: id } = await createFeedback({
-      interviewId: interviewId!,
-      userId: userId!,
-      transcript: messages,
-    })
+      const { success, feedbackId: id } = await createFeedback({
+        interviewId: interviewId!,
+        userId: userId!,
+        transcript: messages,
+      })
 
-    if (success && id) {
-      router.push(`/interview/${interviewId}/feedback`)
-    } else {
-      console.error('Error saving feedback.')
-      router.push('/')
+      if (success && id) {
+        toast.success('Feedback generated!', {
+          description: 'Redirecting you to the feedback page.',
+        })
+        router.push(`/interview/${interviewId}/feedback`)
+      } else {
+        toast.error('Feedback generation failed.', {
+          description: 'Please try again later.',
+        })
+        router.push('/')
+      }
+    } catch (error) {
+      toast.error('An error occurred.', {
+        description: 'Unable to generate feedback.',
+      })
+      console.error(error)
     }
   }
 

@@ -29,7 +29,7 @@ const Page = async () => {
           </p>
 
           <Button asChild className='btn-primary max-sm:full'>
-            <Link href='/interview'>Start an Interview</Link>
+            <Link href='/interview'>Create your Interview</Link>
           </Button>
         </div>
 
@@ -48,7 +48,11 @@ const Page = async () => {
         <div className='interviews-section'>
           {hasPastInterviews ? (
             userInterviews?.map((interview) => (
-              <InterviewCard {...interview} key={interview.id} />
+              <InterviewCard
+                hasDeleteBtn={true}
+                {...interview}
+                key={interview.id}
+              />
             ))
           ) : (
             <p>You haven&apos;t taken any interviews yet</p>

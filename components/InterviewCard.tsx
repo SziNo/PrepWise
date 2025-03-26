@@ -5,6 +5,7 @@ import { Button } from './ui/button'
 import Link from 'next/link'
 import DisplayTechIcons from './DisplayTechIcons'
 import { getFeedbackByInterviewId } from '@/lib/actions/general.action'
+import ClientDeleteButton from './ClientDeleteButton'
 
 const InterviewCard = async ({
   id,
@@ -13,6 +14,7 @@ const InterviewCard = async ({
   type,
   techstack,
   createdAt,
+  hasDeleteBtn = false,
 }: InterviewCardProps) => {
   const feedback =
     userId && id
@@ -26,6 +28,7 @@ const InterviewCard = async ({
   return (
     <div className='card-border w-[360px] max-sm:w-full min-h-96'>
       <div className='card-interview'>
+        {hasDeleteBtn && id && <ClientDeleteButton id={id} />}
         <div>
           <div className='absolute top-0 right-0 w-fit px-4 py-2 rounded-bl-lg bg-light-600'>
             <p className='badge-text'>{normalizedType}</p>
