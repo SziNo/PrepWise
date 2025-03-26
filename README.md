@@ -7,8 +7,7 @@
 
 ## Prepwise: A Job Interview Preparation Platform Powered by Vapi AI Voice Agents
 
-## Deployed to Vercel
-
+**Deployed to Vercel:**  
 [https://prep-wise-nine.vercel.app/](https://prep-wise-nine.vercel.app/)
 
 ## 🚨 Tutorial
